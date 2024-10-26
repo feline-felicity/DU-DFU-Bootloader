@@ -1,0 +1,14 @@
+{
+    "terminal.integrated.env.windows": {
+        "PATH": "/path_to_avr_gcc_and_avrdude:${env:PATH}",
+        "ENV_SERIALUPDIPORT": "COM5"
+    },
+    "C_Cpp.default.compilerPath": "/path_to_avr_gcc_and_avrdude/avr-g++.exe",
+    "C_Cpp.default.cppStandard": "gnu++23",
+    "C_Cpp.default.cStandard": "gnu23",
+    "C_Cpp.default.intelliSenseMode": "gcc-x64",
+    "C_Cpp.default.includePath": [
+        "${workspaceFolder}/**",
+        "/path_to_avr_gcc_and_avrdude/../avr/include"
+    ]
+}

@@ -1,0 +1,209 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build",
+            "type": "shell",
+            "command": "make",
+            "args": [
+                "all",
+                "-j8",
+                "CLOCK=${input:CLOCK}",
+                "MCU=${input:MCU}",
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false,
+                "close": false
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+        },
+        {
+            "label": "Rebuild",
+            "group": {
+                "kind": "build"
+            },
+            "dependsOn" :[
+                "Clean",
+                "Build"
+            ],
+            "dependsOrder": "sequence"
+        },
+        {
+            "label": "Clean",
+            "type": "shell",
+            "command": "make",
+            "args": [
+                "clean",
+                "CLOCK=${input:CLOCK}",
+                "MCU=${input:MCU}"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false,
+                "close": true
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+        },
+        {
+            "label": "Flash",
+            "type": "shell",
+            "command": "make",
+            "args": [
+                "flash",
+                "-j8",
+                "CLOCK=${input:CLOCK}",
+                "PROGRAMMER=${input:PROGRAMMER}",
+                "MCU=${input:MCU}"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false,
+                "close": false
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+        {
+            "label": "Write EEPROM",
+            "type": "shell",
+            "command": "make",
+            "args": [
+                "eeprom",
+                "-j8",
+                "CLOCK=${input:CLOCK}",
+                "PROGRAMMER=${input:PROGRAMMER}",
+                "MCU=${input:MCU}"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false,
+                "close": false
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+        {
+            "label": "Write USERROW",
+            "type": "shell",
+            "command": "make",
+            "args": [
+                "userrow",
+                "-j8",
+                "CLOCK=${input:CLOCK}",
+                "PROGRAMMER=${input:PROGRAMMER}",
+                "MCU=${input:MCU}"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false,
+                "close": false
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+        {
+            "label": "Write BOOTROW",
+            "type": "shell",
+            "command": "make",
+            "args": [
+                "bootrow",
+                "-j8",
+                "CLOCK=${input:CLOCK}",
+                "PROGRAMMER=${input:PROGRAMMER}",
+                "MCU=${input:MCU}"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false,
+                "close": false
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        }
+    ],
+    "inputs": [
+        {
+            "id": "CLOCK",
+            "type": "command",
+            "command": "cpptools.activeConfigCustomVariable",
+            "args": "CLOCK"
+        },
+        {
+            "id": "PROGRAMMER",
+            "type": "command",
+            "command": "cpptools.activeConfigCustomVariable",
+            "args": "PROGRAMMER"
+        },
+        {
+            "id": "MCU",
+            "type": "command",
+            "command": "cpptools.activeConfigCustomVariable",
+            "args": "MCU"
+        }
+    ]
+}

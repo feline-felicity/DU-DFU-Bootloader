@@ -1,0 +1,51 @@
+{
+    "env": {
+        "OPTIONS": [
+            "-Wall",
+            "-Os"
+            // "-DF_CPU=16000000" // For overriding F_CPU in code analysis
+        ]
+    },
+    "configurations": [
+        {
+            "name": "AVR16DU20",
+            "compilerArgs": [
+                "-DF_CPU=24000000",
+                "${OPTIONS}",
+                "-mmcu=avr16du20"
+            ],
+            "customConfigurationVariables": {
+                "CLOCK": "24000000",
+                "MCU": "avr16du20",
+                "PROGRAMMER": "serialupdi"
+            }
+        },
+        {
+            "name": "AVR32DU32",
+            "compilerArgs": [
+                "-DF_CPU=24000000",
+                "${OPTIONS}",
+                "-mmcu=avr32du32"
+            ],
+            "customConfigurationVariables": {
+                "CLOCK": "24000000",
+                "MCU": "avr32du32",
+                "PROGRAMMER": "serialupdi"
+            }
+        },
+        {
+            "name": "AVR64DU32",
+            "compilerArgs": [
+                "-DF_CPU=24000000",
+                "${OPTIONS}",
+                "-mmcu=avr64du32"
+            ],
+            "customConfigurationVariables": {
+                "CLOCK": "24000000",
+                "MCU": "avr64du32",
+                "PROGRAMMER": "serialupdi"
+            }
+        }
+    ],
+    "version": 4
+}
