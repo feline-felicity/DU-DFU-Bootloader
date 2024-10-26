@@ -8,7 +8,7 @@
 #define U16LE(_u16) ((_u16) & 0xFF), (((_u16) >> 8) & 0xFF)
 #define MIN(_a, _b) ((_a)<(_b) ? (_a) : (_b))
 
-volatile const BOOTROW_VAR uint8_t DeviceDescriptor[] = {
+const BOOTROW_VAR uint8_t DeviceDescriptor[] = {
     18,             /* bLength */
     0x01,           /* bDescriptorType = Device */
     U16LE(0x0200),  /* bcdUSB */
@@ -24,7 +24,7 @@ volatile const BOOTROW_VAR uint8_t DeviceDescriptor[] = {
     0x03,           /* iSerialNumber */
     0x01,           /* bNumConfigurations */
 };
-volatile const BOOTROW_VAR uint8_t ConfigDescriptor[] = {
+const BOOTROW_VAR uint8_t ConfigDescriptor[] = {
     /* CONFIG DESC */
     9,              /* bLength */
     0x02,           /* bDescriptorType = Configuration */
@@ -72,13 +72,13 @@ volatile const BOOTROW_VAR uint8_t ConfigDescriptor[] = {
     U16LE(64),      /* wTransferSize: we can accept much more, maybe a whole page (512 B)? */
     U16LE(0x0110),  /* bcdDFUVersion */
 };
-volatile const BOOTROW_VAR uint8_t SD0_LangID[] = { 4, 3, U16LE(0x0409) };
-volatile const BOOTROW_VAR char SD1_Manufacturer[] = { 22, 3, 'B', 0, 'i', 0, 't', 0, 'e', 0, 'r', 0, ' ', 0, 'C', 0, 'a', 0, 't', 0, 's', 0, };                            // "Biter Cats"
-volatile const BOOTROW_VAR char SD2_4_Product_Config[] = { 28, 3, 'A', 0, 'V', 0, 'R', 0, ' ', 0, 'D', 0, 'U', 0, ' ', 0, 'T', 0, 'i', 0, 'n', 0, 'y', 0, 'B', 0, 'L', 0 }; // "AVR DU TinyBL"
-volatile const BOOTROW_VAR char SD5_Alt0[] = { 24, 3, 'F', 0, 'l', 0, 'a', 0, 's', 0, 'h', 0, '+', 0, '0', 0, 'x', 0, '6', 0, '0', 0, '0', 0};                              // "Flash+0x600"
-volatile const BOOTROW_VAR char SD6_Alt1[] = { 14, 3, 'E', 0, 'E', 0, 'P', 0, 'R', 0, 'O', 0, 'M', 0 };                                                                     // "EEPROM"
-volatile const BOOTROW_VAR char SD5_Alt2[] = { 16, 3, 'U', 0, 'S', 0, 'E', 0, 'R', 0, 'R', 0, 'O', 0, 'W', 0 };                                                             // "USERROW"
-volatile const BOOTROW_VAR void *volatile const BOOTROW_VAR SDTable[] = {
+const BOOTROW_VAR uint8_t SD0_LangID[] = { 4, 3, U16LE(0x0409) };
+const BOOTROW_VAR char SD1_Manufacturer[] = { 22, 3, 'B', 0, 'i', 0, 't', 0, 'e', 0, 'r', 0, ' ', 0, 'C', 0, 'a', 0, 't', 0, 's', 0, };                            // "Biter Cats"
+const BOOTROW_VAR char SD2_4_Product_Config[] = { 28, 3, 'A', 0, 'V', 0, 'R', 0, ' ', 0, 'D', 0, 'U', 0, ' ', 0, 'T', 0, 'i', 0, 'n', 0, 'y', 0, 'B', 0, 'L', 0 }; // "AVR DU TinyBL"
+const BOOTROW_VAR char SD5_Alt0[] = { 24, 3, 'F', 0, 'l', 0, 'a', 0, 's', 0, 'h', 0, '+', 0, '0', 0, 'x', 0, '6', 0, '0', 0, '0', 0};                              // "Flash+0x600"
+const BOOTROW_VAR char SD6_Alt1[] = { 14, 3, 'E', 0, 'E', 0, 'P', 0, 'R', 0, 'O', 0, 'M', 0 };                                                                     // "EEPROM"
+const BOOTROW_VAR char SD5_Alt2[] = { 16, 3, 'U', 0, 'S', 0, 'E', 0, 'R', 0, 'R', 0, 'O', 0, 'W', 0 };                                                             // "USERROW"
+const BOOTROW_VAR void *const BOOTROW_VAR SDTable[] = {
     SD0_LangID,
     SD1_Manufacturer,
     SD2_4_Product_Config,
@@ -91,7 +91,7 @@ volatile const BOOTROW_VAR void *volatile const BOOTROW_VAR SDTable[] = {
 
 __attribute__((noinit)) USB_EP_PAIR_t EP0;
 __attribute__((noinit, aligned(2))) volatile uint8_t SetupBuffer[8];
-__attribute__((noinit, aligned(2))) uint8_t PacketBuffer[64];
+__attribute__((noinit, aligned(2))) volatile uint8_t PacketBuffer[64];
 __attribute__((noinit)) struct __attribute__((packed)) {
     uint8_t RequestType;
     uint8_t Request;
@@ -133,7 +133,7 @@ static void poll_for_usb_rmw(void) {
         ;
 }
 
-static void xfer_in(uint8_t *data, uint16_t count) {
+static void xfer_in(volatile uint8_t *data, uint16_t count) {
     EP0.IN.DATAPTR = reinterpret_cast<uint16_t>(data);
     EP0.IN.CNT = count;
     EP0.IN.MCNT = 0;
@@ -149,7 +149,7 @@ static void xfer_out(void) {
     USB0.STATUS[0].OUTCLR = USB_CRC_bm | USB_UNFOVF_bm | USB_TRNCOMPL_bm | USB_EPSETUP_bm | USB_STALLED_bm | USB_BUSNAK_bm;
 }
 
-static void xfer_in_data(uint8_t *data, uint16_t count) {
+static void xfer_in_data(uint8_t volatile *data, uint16_t count) {
     xfer_in(data, count);
     CtrlXferSM.Stage = CtrlXferSM.CXSM_DATA;
 }
@@ -174,7 +174,7 @@ static void stall(void) {
     EP0.OUT.CTRL |= USB_DOSTALL_bm;
 }
 
-static void xfer_in_data_from_bootrow(const volatile uint8_t *data, uint8_t count) {
+static void xfer_in_data_from_bootrow(const uint8_t *data, uint8_t count) {
     for(uint8_t i = 0; i < MIN(count, sizeof(PacketBuffer)); i++) {
         PacketBuffer[i] = data[i];
     }
@@ -191,7 +191,7 @@ static void send_serial_desc(void) {
     PacketBuffer[0] = 26;
     PacketBuffer[1] = 3;  // String descriptor (26 B)
     volatile uint8_t *sernum = (&SIGROW.SERNUM0);
-    uint8_t *pbuf = &PacketBuffer[2];
+    volatile uint8_t *pbuf = &PacketBuffer[2];
     for (uint8_t i = 0; i<12; i++) {
         // Coerce to printable region of ASCII, though the result is not truely unique
         *pbuf++ = (*sernum++ & 0x3F) + 0x30;
@@ -208,7 +208,7 @@ static void handle_get_descriptor(void) {
     } else if(desctype == 2 /* Config */ /* && descidx == 0 */) {
         xfer_in_data_from_bootrow(ConfigDescriptor, MIN(sizeof(ConfigDescriptor), CtrlXferSM.Length));
     } else if(desctype == 3 /* String */ && descidx < sizeof(SDTable) / sizeof(void *)) {
-        const volatile uint8_t *strdesc = reinterpret_cast<const volatile uint8_t *>(SDTable[descidx]);
+        const uint8_t *strdesc = reinterpret_cast<const uint8_t *>(SDTable[descidx]);
         if(strdesc == nullptr) {
             send_serial_desc();
         } else {
