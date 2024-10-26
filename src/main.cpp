@@ -186,18 +186,25 @@ static void poll_for_nvm_busy_cleared(void){
         ;
 }
 
+static uint8_t low_nibble_to_hex(uint8_t nibble) {
+    nibble &= 0x0F;
+    return nibble < 10 ? (nibble + '0') : (nibble - 10 + 'A');
+}
+
 static void send_serial_desc(void) {
     // Use 12 bytes from Signature Row Serial Number
-    PacketBuffer[0] = 26;
-    PacketBuffer[1] = 3;  // String descriptor (26 B)
+    volatile uint8_t *pbuf = &PacketBuffer[0];
     volatile uint8_t *sernum = (&SIGROW.SERNUM0);
-    volatile uint8_t *pbuf = &PacketBuffer[2];
-    for (uint8_t i = 0; i<12; i++) {
-        // Coerce to printable region of ASCII, though the result is not truely unique
-        *pbuf++ = (*sernum++ & 0x3F) + 0x30;
+    *pbuf++ = 12 * 4 + 2;
+    *pbuf++ = 3;  // String descriptor (26 B)
+    for(uint8_t i = 0; i < 12; i++) {
+        uint8_t byte = *sernum++;
+        *pbuf++ = low_nibble_to_hex(byte >> 4);
+        *pbuf++ = 0;
+        *pbuf++ = low_nibble_to_hex(byte);
         *pbuf++ = 0;
     }
-    xfer_in_data(PacketBuffer, 26);
+    xfer_in_data(PacketBuffer, 12 * 4 + 2);
 }
 
 static void handle_get_descriptor(void) {
@@ -472,22 +479,22 @@ static void reset_usb(void) {
     EP0.OUT.STATUS = USB_BUSNAK_bm;
     EP0.OUT.CTRL = static_cast<uint8_t>(USB_TYPE_CONTROL_gc) | USB_BUFSIZE_DEFAULT_BUF64_gc;
     EP0.OUT.DATAPTR = reinterpret_cast<uint16_t>(SetupBuffer);
+    SYSCFG.VUSBCTRL = SYSCFG_USBVREG_bm;
     USB0.EPPTR = reinterpret_cast<uint16_t>(&EP0);
     USB0.ADDR = 0;
     USB0.INTCTRLA = 0;
     USB0.INTCTRLB = 0;
     USB0.INTFLAGSA = USB_SOF_bm | USB_SUSPEND_bm | USB_RESUME_bm | USB_RESET_bm | USB_STALLED_bm | USB_UNF_bm | USB_OVF_bm;
     USB0.INTFLAGSB = USB_TRNCOMPL_bm | USB_GNDONE_bm | USB_SETUP_bm;
+    USB0.CTRLB = USB_ATTACH_bm;
+    USB0.CTRLA = USB_ENABLE_bm | (0 << USB_MAXEP_gp);
 }
 
 static void bootloader_main(void) {
     // USB requires 12 MHz MCLK
     _PROTECTED_WRITE(CLKCTRL.OSCHFCTRLA, CLKCTRL_FRQSEL_24M_gc);
-    SYSCFG.VUSBCTRL = SYSCFG_USBVREG_bm;
     // Initialize USB (EP0 only, no FIFO, no interrupt)
     reset_usb();
-    USB0.CTRLB = USB_ATTACH_bm;
-    USB0.CTRLA = USB_ENABLE_bm | (0 << USB_MAXEP_gp);
     // Main loop
     while(true) {
         if(USB0.INTFLAGSB & USB_SETUP_bm) {
